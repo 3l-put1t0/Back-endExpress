@@ -27,10 +27,49 @@ app.get("/products", (req, res) => {
 // Se va a obtener solo un producto, según su ID
 app.get("/products/:id", (req, res) => {
     const { id } = req.params;
+    console.log(id);
     const product = productManager.getProductID(id);
     res.status(201).json({ message: "success", result: product });
 });//End GET-id
 
+// Rescribe todo el archivo desde el FRONT usando datos quemados internamente
+app.post("/products/write", (req, res) =>{
+    productManager.rewriteFile();
+    res.status(201).json({message: "success", result: "wrote"});
+});//End POST-WRITE
+
+//Agrega un puevo producto
+app.post("/products", (req, res) =>{
+    const {name, description, price,stock} = req.body;
+    if(!name || !description || !price || !stock) return res.status(400).json({message: "error", result: {}});
+    const data = {name, description, price, stock};
+    productManager.createProduct(data);
+    res.status(201).json({message: "success", result: "create"});
+
+});//End POST
+
+//Elimina un producto según el ID correspondiente
+app.delete("/products/:id", (req, res) =>{
+    const {id}  = req.params;
+    if (id < 0) return res.status(400).json({message: "error", result: {}});
+    const exist = productManager.deleteProducts(id);
+    exist ?  res.status(201).json({message: "success", result: "delete"}) : res.status(400).json({message: "error", result: "No delete"});
+   
+})//End DELETE;
+
+//Actulaiza un producto
+app.patch("/products/:id", (req, res) => {
+    const {id} = req.params;
+    const {name, description, price, stock} = req.body;
+    const data = {
+        name,
+        description,
+        price,
+        stock
+    };
+    productManager.updateProducts(id, data);
+    res.status(201).json({message: "success", result: "update"});
+});//End PATH
 
 app.listen(PORT, () => {
     try {
